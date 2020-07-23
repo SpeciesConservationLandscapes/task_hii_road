@@ -5,7 +5,7 @@ from task_base import EETask
 
 
 class HIIRoad(EETask):
-    ee_rootdir = "projects/HII/v1/sumatra_poc"
+    ee_rootdir = "projects/HII/v1/"
     ee_driverdir = "driver/road"
     ee_hiistatic_osm = "projects/HII/v1/source/osm_earth/"
     ee_hiistatic_infra = "projects/HII/v1/source/infra/"
@@ -168,14 +168,14 @@ class HIIRoad(EETask):
         "watermask": {
             "ee_type": EETask.IMAGE,
             "ee_path": f"{ee_hiistatic_physical}watermask_jrc70_cciocean",
-            "maxage": 40,
+            "static": True,
         },
             }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.set_aoi_from_ee("{}/sumatra_poc_aoi".format(self.ee_rootdir))
+        self.set_aoi_from_ee("{}/earth_aoi_snw".format(self.ee_rootdir))
 
     def calc(self):
         watermask = ee.Image(self.inputs["watermask"]["ee_path"])
