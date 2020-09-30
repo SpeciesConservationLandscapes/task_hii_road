@@ -1,10 +1,9 @@
 import argparse
 import ee
 from datetime import datetime, timezone
-from task_base import EETask
+from task_base import HIITask
 
-
-class HIIRoad(EETask):
+class HIIRoad(HIITask):
     ee_rootdir = "projects/HII/v1/"
     ee_driverdir = "driver/road"
     ee_hiistatic_osm = "projects/HII/v1/source/osm_earth/"
@@ -50,123 +49,123 @@ class HIIRoad(EETask):
 
     inputs = {
         "highway_bridleway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/bridleway",
         },
         "highway_bus_guideway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/bus_guideway",
         },
         "highway_cycleway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/cycleway",
         },
         "highway_elevator": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/elevator",
         },
         "highway_escape": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/escape",
         },
         "highway_footway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/footway",
         },
         "highway_living_street": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/living_street",
         },
         "highway_mini_roundabout": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/mini_roundabout",
         },
         "highway_motorway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/motorway",
         },
         "highway_motorway_link": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/motorway_link",
         },
         "highway_path": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/path",
         },
         "highway_pedestrian": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/pedestrian",
         },
         "highway_primary": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/primary",
         },
         "highway_primary_link": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/primary_link",
         },
         "highway_raceway": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/raceway",
         },
         "highway_rest_area": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/rest_area",
         },
         "highway_road": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/road",
         },
         "highway_secondary": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/secondary",
         },
         "highway_secondary_link": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/secondary_link",
         },
         "highway_service": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/service",
         },
         "highway_steps": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/steps",
         },
         "highway_tertiary": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/tertiary",
         },
         "highway_tertiary_link": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/tertiary_link",
         },
         "highway_track": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/track",
         },
         "highway_trunk": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/trunk",
         },
         "highway_trunk_link": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/trunk_link",
         },
         "highway_turning_circle": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/turning_circle",
         },
         "highway_unclassified": {
-            "ee_type": EETask.IMAGECOLLECTION,
+            "ee_type": HIITask.IMAGECOLLECTION,
             "ee_path": f"{ee_hiistatic_osm}highway/unclassified",
         },
         "groads_additions": {
-            "ee_type": EETask.IMAGE,
+            "ee_type": HIITask.IMAGE,
             "ee_path": f"{ee_hiistatic_infra}groads_additions",
         },
         "watermask": {
-            "ee_type": EETask.IMAGE,
+            "ee_type": HIITask.IMAGE,
             "ee_path": f"{ee_hiistatic_physical}watermask_jrc70_cciocean",
             "static": True,
         },
@@ -174,8 +173,10 @@ class HIIRoad(EETask):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.realm = kwargs.pop("realm", None)
 
-        self.set_aoi_from_ee("{}/earth_aoi_snw".format(self.ee_rootdir))
+        self.set_aoi_from_ee('projects/HII/v1/source/realms/' + self.realm)  
+
 
     def calc(self):
         watermask = ee.Image(self.inputs["watermask"]["ee_path"])
@@ -340,7 +341,8 @@ class HIIRoad(EETask):
 
         self.export_image_ee(
             roads_total,
-            "{}/{}".format(self.ee_driverdir, "hii_road_driver"),
+            "{}/{}".format(self.ee_driverdir, "aois/" + self.realm),
+            
         )
 
     def check_inputs(self):
@@ -349,6 +351,7 @@ class HIIRoad(EETask):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--realm", default='Afrotropic')
     parser.add_argument("-d", "--taskdate", default=datetime.now(timezone.utc).date())
     options = parser.parse_args()
     road_task = HIIRoad(**vars(options))
