@@ -106,8 +106,6 @@ venv.bak/
 # Ignore .config folder
 .config/
 
-#Ignore buildrun file
-buildrun.sh
 
 
 .DS_Store
