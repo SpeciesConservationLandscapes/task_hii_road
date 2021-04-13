@@ -1,11 +1,11 @@
 import argparse
 import ee
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from task_base import HIITask
 
 
 class HIIRoad(HIITask):
-    scale = 100
+    SCALE = 100  # TODO: test outputs and export times with 300 vs 100
     OSM_START = datetime(2012, 9, 12).date()
     KERNEL_DISTANCE = 500
     DIRECT_INFLUENCE_RADIUS = 350
@@ -19,6 +19,7 @@ class HIIRoad(HIITask):
             "ee_path": "projects/HII/v1/osm/osm_image",
             "maxage": 1,
         },
+        # TODO: refactor source dir structure
         "groads": {
             "ee_type": HIITask.IMAGE,
             "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global-v2",
@@ -92,13 +93,11 @@ class HIIRoad(HIITask):
         osm_direct = (
             osm_roads.distance(kernel=self.kernel(), skipMasked=False)
             .lte(self.DIRECT_INFLUENCE_RADIUS)
-            .selfMask()
             .multiply(weights_image)
         )
         groads_direct = (
             self.groads.distance(kernel=self.kernel(), skipMasked=False)
             .lte(self.DIRECT_INFLUENCE_RADIUS)
-            .selfMask()
             .multiply(self.weights["groad"])
         )
 
@@ -109,20 +108,17 @@ class HIIRoad(HIITask):
         self.road_direct = (
             osm_direct.addBands(groads_fill)
             .reduce(ee.Reducer.sum())
-            .multiply(2)
+            .multiply(2)  # TODO: confirm reason and necessity of this step
             .unmask(0)
             .rename("road_direct_influence")
         )
 
     def groads_influence(self):
         self.road_direct = (
-            (
-                self.groads.distance(kernel=self.kernel(), skipMasked=False)
-                .lte(self.DIRECT_INFLUENCE_RADIUS)
-                .selfMask()
-                .multiply(self.weights["groad"])
-            )
-            .multiply(2)
+            self.groads.distance(kernel=self.kernel(), skipMasked=False)
+            .lte(self.DIRECT_INFLUENCE_RADIUS)
+            .multiply(self.weights["groad"])
+            .multiply(2)  # TODO: confirm reason and necessity of this step
             .unmask(0)
             .rename("road_direct_influence")
         )
@@ -144,12 +140,11 @@ class HIIRoad(HIITask):
             .rename("roads_indirect_influence")
         )
         # TODO: determine if drivers are to be normalized or not.
-        # TODO: values beyond indirect range (15km) - do we set to 0 or mask?
         road_driver = (
             self.road_direct.where(self.road_direct.eq(0), road_indirect)
             .rename("road_driver")
-            .updateMask(self.water)  # Mask water
-            .multiply(100)  # Scales outputs and sets data to integer
+            .updateMask(self.water)
+            .multiply(100)
             .int()
         )
 
@@ -158,7 +153,6 @@ class HIIRoad(HIITask):
             f"driver/roads",
         )
 
-    # Check inputs is not called if date is before OSM_START
     def check_inputs(self):
         if self.taskdate >= self.OSM_START:
             super().check_inputs()
