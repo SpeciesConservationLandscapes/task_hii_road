@@ -5,7 +5,7 @@ from task_base import HIITask
 
 
 class HIIRoad(HIITask):
-    SCALE = 100  # TODO: test outputs and export times with 300 vs 100
+    SCALE = 300  # TODO: test outputs and export times with 300 vs 100
     OSM_START = datetime(2012, 9, 12).date()
     NOMINAL_ROAD_WIDTH = 300  # width of roads in inputs
     DIRECT_INFLUENCE_WIDTH = 1000  # total width of direct influence (meters)
@@ -31,11 +31,6 @@ class HIIRoad(HIITask):
         "water": {
             "ee_type": HIITask.IMAGE,
             "ee_path": "projects/HII/v1/source/phys/watermask_jrc70_cciocean",
-            "static": True,
-        },
-        "ocean": {
-            "ee_type": HIITask.IMAGE,
-            "ee_path": "projects/HII/v1/source/phys/ESACCI-LC-L4-WB-Ocean-Map-150m-P13Y-2000-v40",
             "static": True,
         },
     }
@@ -84,6 +79,7 @@ class HIIRoad(HIITask):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.scale = self.SCALE
         # Sumatra AOI for testing
         # self.set_aoi_from_ee(
         #     "projects/SCL/v1/Panthera_tigris/geographies/Sumatra/Sumatra_woody_cover"
@@ -93,18 +89,16 @@ class HIIRoad(HIITask):
         )
         self.groads = ee.Image(self.inputs["groads"]["ee_path"])
         self.water = ee.Image(self.inputs["water"]["ee_path"])
-        self.ocean = ee.Image(self.inputs["ocean"]["ee_path"])
         self.road_direct_cost = None
         self.road_indirect_cost = None
-
-    def kernel(self, impact):
-        if impact == "DIRECT":
-            kernel_radius = self.DIRECT_INFLUENCE_WIDTH / 2
-        elif impact == "INDIRECT":
-            kernel_radius = self.INDIRECT_INFLUENCE_RADIUS
-        else:
-            kernel_radius = 0
-        return ee.Kernel.euclidean(radius=kernel_radius, units="meters")
+        self.kernel = {
+            "DIRECT": ee.Kernel.euclidean(
+                radius=self.DIRECT_INFLUENCE_WIDTH / 2, units="meters"
+            ),
+            "INDIRECT": ee.Kernel.euclidean(
+                radius=self.INDIRECT_INFLUENCE_RADIUS, units="meters"
+            ),
+        }
 
     def osm_groads_combined_influence(self):
         osm_band_names = self.osm.bandNames()
@@ -129,29 +123,23 @@ class HIIRoad(HIITask):
         )
 
         direct_weights = road_weights.toImage()
-        indriect_weights = direct_weights.multiply(self.DIRECT_INDIRECT_INFLUENCE_RATIO)
+        indirect_weights = direct_weights.multiply(self.DIRECT_INDIRECT_INFLUENCE_RATIO)
 
         osm_roads = self.osm.select(band_names.get("osm"))
 
         osm_direct = (
-            osm_roads.distance(kernel=self.kernel("DIRECT"), skipMasked=False)
+            osm_roads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
             .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
             .multiply(direct_weights.select(band_names.get("osm")))
         )
 
         groad_direct = (
-            self.groads.distance(kernel=self.kernel("DIRECT"), skipMasked=False)
+            self.groads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
             .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
             .multiply(direct_weights.select(band_names.get("groad")))
         )
 
-        non_osm = (
-            osm_direct.reduce(ee.Reducer.max())
-            .unmask(0)
-            .eq(0)
-            .updateMask(self.ocean)
-            .selfMask()
-        )
+        non_osm = osm_direct.reduce(ee.Reducer.max()).unmask(0).eq(0).selfMask()
 
         groad_fill = groad_direct.updateMask(non_osm)
 
@@ -161,7 +149,7 @@ class HIIRoad(HIITask):
         )
 
         road_indirect_cost_distance = road_direct_bands.distance(
-            kernel=self.kernel("INDIRECT"), skipMasked=False
+            kernel=self.kernel["INDIRECT"], skipMasked=False
         )
         motorized_indirect_cost = road_indirect_cost_distance.select(
             band_names.get("motorized")
@@ -173,7 +161,7 @@ class HIIRoad(HIITask):
         motorized_decay = (
             motorized_indirect_cost.multiply(self.DECAY_CONSTANT_MOTORIZED)
             .exp()
-            .multiply(indriect_weights.select(band_names.get("motorized")))
+            .multiply(indirect_weights.select(band_names.get("motorized")))
             .updateMask(
                 motorized_indirect_cost.lte(
                     self.INDIRECT_INFLUENCE_RADIUS - (self.DIRECT_INFLUENCE_WIDTH / 2)
@@ -186,7 +174,7 @@ class HIIRoad(HIITask):
         non_motorized_decay = (
             non_motorized_indirect_cost.multiply(self.DECAY_CONSTANT_NON_MOTORIZED)
             .exp()
-            .multiply(indriect_weights.select(band_names.get("non_motorized")))
+            .multiply(indirect_weights.select(band_names.get("non_motorized")))
             .updateMask(
                 non_motorized_indirect_cost.lte(
                     self.INDIRECT_INFLUENCE_RADIUS - (self.DIRECT_INFLUENCE_WIDTH / 2)
@@ -204,13 +192,13 @@ class HIIRoad(HIITask):
         )
 
         self.road_direct_cost = (
-            self.groads.distance(kernel=self.kernel("DIRECT"), skipMasked=False)
+            self.groads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
             .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
             .multiply(groad_direct_weight)
             .rename("road_direct")
         )
         groad_indirect_cost_distance = self.road_direct_cost.distance(
-            kernel=self.kernel("INDIRECT"), skipMasked=False
+            kernel=self.kernel["INDIRECT"], skipMasked=False
         )
         self.road_indirect_cost = (
             groad_indirect_cost_distance.multiply(self.DECAY_CONSTANT_MOTORIZED)
@@ -240,8 +228,7 @@ class HIIRoad(HIITask):
             .rename("hii_road_driver")
         )
 
-        # # TODO: determine if drivers are to be normalized or not.
-
+        # TODO: implement normalization options
         self.export_image_ee(
             road_driver,
             f"driver/roads",
