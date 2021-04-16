@@ -3,355 +3,244 @@ import ee
 from datetime import datetime, timezone
 from task_base import HIITask
 
+
 class HIIRoad(HIITask):
-    ee_rootdir = "projects/HII/v1/"
-    ee_driverdir = "driver/road"
-    ee_hiistatic_osm = "projects/HII/v1/source/osm_earth/"
-    ee_hiistatic_infra = "projects/HII/v1/source/infra/"
-    ee_hiistatic_physical = "projects/HII/v1/source/phys/"
-    scale = 300
-    DECAY_CONSTANT = -0.0002
-    INDIRECT_INFLUENCE = 4
-
-    highway_bridleway_weighting = 10
-    highway_bus_guideway_weighting = 10
-    highway_cycleway_weighting = 10
-    highway_elevator_weighting = 10
-    highway_escape_weighting = 4
-    highway_footway_weighting = 4
-    highway_living_street_weighting = 10
-    highway_mini_roundabout_weighting = 10
-    highway_motorway_weighting = 10
-    highway_motorway_link_weighting = 10
-    highway_path_weighting = 4
-    highway_pedestrian_weighting = 4
-    highway_primary_weighting = 10
-    highway_primary_link_weighting = 10
-    highway_raceway_weighting = 10
-    highway_rest_area_weighting = 10
-    highway_road_weighting = 10
-    highway_secondary_weighting = 10
-    highway_secondary_link_weighting = 10
-    highway_service_weighting = 10
-    highway_steps_weighting = 4
-    highway_tertiary_weighting = 10
-    highway_tertiary_link_weighting = 10
-    highway_track_weighting = 4
-    highway_trunk_weighting = 10
-    highway_trunk_link_weighting = 10
-    highway_turning_circle_weighting = 10
-    highway_unclassified_weighting = 10
-
-    highway_groads_weighting = 10
-
-
-
+    SCALE = 300
+    OSM_START = datetime(2012, 9, 12).date()
+    NOMINAL_ROAD_WIDTH = 300  # width of roads in inputs
+    DIRECT_INFLUENCE_WIDTH = 1000  # total width of direct influence (meters)
+    INDIRECT_INFLUENCE_RADIUS = (
+        15000  # distance from road indirect influence limit (meters)
+    )
+    DECAY_CONSTANT_MOTORIZED = -0.0003
+    DECAY_CONSTANT_NON_MOTORIZED = -0.0004
+    DIRECT_INDIRECT_INFLUENCE_RATIO = 0.5
 
     inputs = {
-        "highway_bridleway": {
+        "osm": {
             "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/bridleway",
+            "ee_path": "projects/HII/v1/osm/osm_image",
+            "maxage": 1,
         },
-        "highway_bus_guideway": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/bus_guideway",
-        },
-        "highway_cycleway": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/cycleway",
-        },
-        "highway_elevator": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/elevator",
-        },
-        "highway_escape": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/escape",
-        },
-        "highway_footway": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/footway",
-        },
-        "highway_living_street": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/living_street",
-        },
-        "highway_mini_roundabout": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/mini_roundabout",
-        },
-        "highway_motorway": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/motorway",
-        },
-        "highway_motorway_link": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/motorway_link",
-        },
-        "highway_path": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/path",
-        },
-        "highway_pedestrian": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/pedestrian",
-        },
-        "highway_primary": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/primary",
-        },
-        "highway_primary_link": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/primary_link",
-        },
-        "highway_raceway": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/raceway",
-        },
-        "highway_rest_area": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/rest_area",
-        },
-        "highway_road": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/road",
-        },
-        "highway_secondary": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/secondary",
-        },
-        "highway_secondary_link": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/secondary_link",
-        },
-        "highway_service": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/service",
-        },
-        "highway_steps": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/steps",
-        },
-        "highway_tertiary": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/tertiary",
-        },
-        "highway_tertiary_link": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/tertiary_link",
-        },
-        "highway_track": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/track",
-        },
-        "highway_trunk": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/trunk",
-        },
-        "highway_trunk_link": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/trunk_link",
-        },
-        "highway_turning_circle": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/turning_circle",
-        },
-        "highway_unclassified": {
-            "ee_type": HIITask.IMAGECOLLECTION,
-            "ee_path": f"{ee_hiistatic_osm}highway/unclassified",
-        },
-        "groads_additions": {
+        # TODO: refactor source dir structure
+        "groads": {
             "ee_type": HIITask.IMAGE,
-            "ee_path": f"{ee_hiistatic_infra}groads_additions",
-        },
-        "watermask": {
-            "ee_type": HIITask.IMAGE,
-            "ee_path": f"{ee_hiistatic_physical}watermask_jrc70_cciocean",
+            "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global-v2",
             "static": True,
         },
-            }
+        "water": {
+            "ee_type": HIITask.IMAGE,
+            "ee_path": "projects/HII/v1/source/phys/watermask_jrc70_cciocean",
+            "static": True,
+        },
+    }
+    # road keys and relative importance: https://wiki.openstreetmap.org/wiki/Key:highway
+    road_weights = {
+        "motorized": {
+            # roads
+            "highway_motorway": 10,
+            "highway_trunk": 10,
+            "highway_primary": 9,
+            "highway_secondary": 9,
+            "highway_tertiary": 8,
+            "highway_unclassified": 7,
+            "highway_residential": 7,
+            # link roads
+            "highway_motorway_link": 10,
+            "highway_trunk_link": 10,
+            "highway_primary_link": 9,
+            "highway_secondary_link": 9,
+            "highway_tertiary_link": 8,
+            # special road types
+            "highway_living_street": 7,
+            "highway_service": 8,
+            "highway_pedestrian": 6,
+            "highway_track": 5,
+            "highway_bus_guideway": 8,
+            "highway_escape": 8,
+            "highway_raceway": 8,
+            "highway_road": 10,
+            # other highway features
+            "highway_elevator": 8,
+            "highway_mini_roundabout": 8,
+            "highway_rest_area": 7,
+            "highway_turning_circle": 8,
+            # groad
+            "groad": 10,
+        },
+        "non_motorized": {
+            "highway_footway": 2,
+            "highway_bridleway": 3,
+            "highway_steps": 4,
+            "highway_path": 2,
+            "highway_cycleway": 4,
+        },
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.realm = kwargs.pop("realm", None)
+        self.scale = self.SCALE
+        # Sumatra AOI for testing
+        # self.set_aoi_from_ee(
+        #     "projects/SCL/v1/Panthera_tigris/geographies/Sumatra/Sumatra_woody_cover"
+        # )
+        self.osm, _ = self.get_most_recent_image(
+            ee.ImageCollection(self.inputs["osm"]["ee_path"])
+        )
+        self.groads = ee.Image(self.inputs["groads"]["ee_path"])
+        self.water = ee.Image(self.inputs["water"]["ee_path"])
+        self.road_direct_cost = None
+        self.road_indirect_cost = None
+        self.kernel = {
+            "DIRECT": ee.Kernel.euclidean(
+                radius=self.DIRECT_INFLUENCE_WIDTH / 2, units="meters"
+            ),
+            "INDIRECT": ee.Kernel.euclidean(
+                radius=self.INDIRECT_INFLUENCE_RADIUS, units="meters"
+            ),
+        }
 
-        self.set_aoi_from_ee('projects/HII/v1/source/realms/' + self.realm)  
+    def osm_groads_combined_influence(self):
+        osm_band_names = self.osm.bandNames()
+        motorized_weights = ee.Dictionary(self.road_weights["motorized"])
+        non_motorized_weights = ee.Dictionary(self.road_weights["non_motorized"])
+        road_weights = motorized_weights.combine(non_motorized_weights)
+        band_names = ee.Dictionary(
+            {
+                "all": road_weights.keys(),
+                "osm": osm_band_names.filter(
+                    ee.Filter.inList("item", road_weights.keys())
+                ),
+                "motorized": motorized_weights.keys().filter(
+                    ee.Filter.Or(
+                        ee.Filter.inList("item", osm_band_names),
+                        ee.Filter.eq("item", "groad"),
+                    )
+                ),
+                "non_motorized": non_motorized_weights.keys(),
+                "groad": ["groad"],
+            }
+        )
 
+        direct_weights = road_weights.toImage()
+        indirect_weights = direct_weights.multiply(self.DIRECT_INDIRECT_INFLUENCE_RATIO)
+
+        osm_roads = self.osm.select(band_names.get("osm"))
+
+        osm_direct = (
+            osm_roads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
+            .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
+            .multiply(direct_weights.select(band_names.get("osm")))
+        )
+
+        groad_direct = (
+            self.groads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
+            .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
+            .multiply(direct_weights.select(band_names.get("groad")))
+        )
+
+        non_osm = osm_direct.reduce(ee.Reducer.max()).unmask(0).eq(0).selfMask()
+
+        groad_fill = groad_direct.updateMask(non_osm)
+
+        road_direct_bands = osm_direct.addBands(groad_fill)
+        self.road_direct_cost = road_direct_bands.reduce(ee.Reducer.max()).rename(
+            "road_direct"
+        )
+
+        road_indirect_cost_distance = road_direct_bands.distance(
+            kernel=self.kernel["INDIRECT"], skipMasked=False
+        )
+        motorized_indirect_cost = road_indirect_cost_distance.select(
+            band_names.get("motorized")
+        )
+        non_motorized_indirect_cost = road_indirect_cost_distance.select(
+            band_names.get("non_motorized")
+        )
+
+        motorized_decay = (
+            motorized_indirect_cost.multiply(self.DECAY_CONSTANT_MOTORIZED)
+            .exp()
+            .multiply(indirect_weights.select(band_names.get("motorized")))
+            .updateMask(
+                motorized_indirect_cost.lte(
+                    self.INDIRECT_INFLUENCE_RADIUS - (self.DIRECT_INFLUENCE_WIDTH / 2)
+                )
+            )
+            .reduce(ee.Reducer.max())
+            .rename("road_indirect_motorized")
+        )
+
+        non_motorized_decay = (
+            non_motorized_indirect_cost.multiply(self.DECAY_CONSTANT_NON_MOTORIZED)
+            .exp()
+            .multiply(indirect_weights.select(band_names.get("non_motorized")))
+            .updateMask(
+                non_motorized_indirect_cost.lte(
+                    self.INDIRECT_INFLUENCE_RADIUS - (self.DIRECT_INFLUENCE_WIDTH / 2)
+                )
+            )
+            .reduce(ee.Reducer.max())
+            .rename("road_indirect_non_motorized")
+        )
+        self.road_indirect_cost = motorized_decay.addBands(non_motorized_decay)
+
+    def groads_influence(self):
+        groad_direct_weight = self.road_weights["motorized"]["groad"]
+        groad_indirect_weight = groad_direct_weight * (
+            self.DIRECT_INDIRECT_INFLUENCE_RATIO
+        )
+
+        self.road_direct_cost = (
+            self.groads.distance(kernel=self.kernel["DIRECT"], skipMasked=False)
+            .lte((self.DIRECT_INFLUENCE_WIDTH - self.NOMINAL_ROAD_WIDTH) / 2)
+            .multiply(groad_direct_weight)
+            .rename("road_direct")
+        )
+        groad_indirect_cost_distance = self.road_direct_cost.distance(
+            kernel=self.kernel["INDIRECT"], skipMasked=False
+        )
+        self.road_indirect_cost = (
+            groad_indirect_cost_distance.multiply(self.DECAY_CONSTANT_MOTORIZED)
+            .exp()
+            .multiply(groad_indirect_weight)
+            .updateMask(
+                groad_indirect_cost_distance.lte(
+                    self.INDIRECT_INFLUENCE_RADIUS - (self.DIRECT_INFLUENCE_WIDTH / 2)
+                )
+            )
+            .rename("road_indirect_motorized")
+        )
 
     def calc(self):
-        watermask = ee.Image(self.inputs["watermask"]["ee_path"])
+        if self.osm:
+            self.osm_groads_combined_influence()
+        else:
+            self.groads_influence()
 
-        highway_bridleway, highway_bridleway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_bridleway"]["ee_path"])
-        )
-        
-        highway_bus_guideway, highway_bus_guideway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_bus_guideway"]["ee_path"])
-        )
-        
-        highway_cycleway, highway_cycleway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_cycleway"]["ee_path"])
-        )
-        
-        highway_elevator, highway_elevator_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_elevator"]["ee_path"])
-        )
-        
-        highway_escape, highway_escape_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_escape"]["ee_path"])
-        )
-        
-        highway_footway, highway_footway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_footway"]["ee_path"])
-        )
-        
-        highway_living_street, highway_living_street_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_living_street"]["ee_path"])
-        )
-        
-        highway_mini_roundabout, highway_mini_roundabout_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_mini_roundabout"]["ee_path"])
-        )
-
-        highway_motorway, highway_motorway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_motorway"]["ee_path"])
-        )
-
-        highway_motorway_link, highway_motorway_link_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_motorway_link"]["ee_path"])
-        )
-        
-        highway_path, highway_path_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_path"]["ee_path"])
-        )
-        
-        highway_pedestrian, highway_pedestrian_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_pedestrian"]["ee_path"])
-        )
-        
-        highway_primary, highway_primary_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_primary"]["ee_path"])
-        )
-        
-        highway_primary_link, highway_primary_link_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_primary_link"]["ee_path"])
-        )
-        
-        highway_raceway, highway_raceway_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_raceway"]["ee_path"])
-        )
-        
-        highway_rest_area, highway_rest_area_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_rest_area"]["ee_path"])
-        )
-        
-        highway_road, highway_road_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_road"]["ee_path"])
-        )
-
-        highway_secondary, highway_secondary_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_secondary"]["ee_path"])
-        )
-
-        highway_secondary_link, highway_secondary_link_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_secondary_link"]["ee_path"])
-        )
-        
-        highway_service, highway_service_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_service"]["ee_path"])
-        )
-        
-        highway_steps, highway_steps_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_steps"]["ee_path"])
-        )
-        
-        highway_tertiary, highway_tertiary_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_tertiary"]["ee_path"])
-        )
-        
-        highway_tertiary_link, highway_tertiary_link_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_tertiary_link"]["ee_path"])
-        )
-        
-        highway_track, highway_track_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_track"]["ee_path"])
-        )
-        
-        highway_trunk, highway_trunk_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_trunk"]["ee_path"])
-        )
-        
-        highway_trunk_link, highway_trunk_link_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_trunk_link"]["ee_path"])
-        )
-
-        highway_turning_circle, highway_turning_circle_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_turning_circle"]["ee_path"])
-        )
-
-        highway_unclassified, highway_unclassified_date = self.get_most_recent_image(
-            ee.ImageCollection(self.inputs["highway_unclassified"]["ee_path"])
-        )
-
-
-
-        highway_total = (highway_bridleway.multiply(self.highway_bridleway_weighting)
-            .add(highway_bus_guideway.multiply(self.highway_bus_guideway_weighting))
-            .add(highway_cycleway.multiply(self.highway_cycleway_weighting))
-            .add(highway_elevator.multiply(self.highway_elevator_weighting))
-            .add(highway_escape.multiply(self.highway_escape_weighting))
-            .add(highway_footway.multiply(self.highway_footway_weighting))
-            .add(highway_living_street.multiply(self.highway_living_street_weighting))
-            .add(highway_mini_roundabout.multiply(self.highway_mini_roundabout_weighting))
-            .add(highway_motorway.multiply(self.highway_motorway_weighting))
-            .add(highway_motorway_link.multiply(self.highway_motorway_link_weighting))
-            .add(highway_path.multiply(self.highway_path_weighting))
-            .add(highway_pedestrian.multiply(self.highway_pedestrian_weighting))
-            .add(highway_primary.multiply(self.highway_primary_weighting))
-            .add(highway_primary_link.multiply(self.highway_primary_link_weighting))
-            .add(highway_raceway.multiply(self.highway_raceway_weighting))
-            .add(highway_rest_area.multiply(self.highway_rest_area_weighting))
-            .add(highway_road.multiply(self.highway_road_weighting))
-            .add(highway_secondary.multiply(self.highway_secondary_weighting))
-            .add(highway_secondary_link.multiply(self.highway_secondary_link_weighting))
-            .add(highway_service.multiply(self.highway_service_weighting))
-            .add(highway_steps.multiply(self.highway_steps_weighting))
-            .add(highway_tertiary.multiply(self.highway_tertiary_weighting))
-            .add(highway_tertiary_link.multiply(self.highway_tertiary_link_weighting))
-            .add(highway_track.multiply(self.highway_track_weighting))
-            .add(highway_trunk.multiply(self.highway_trunk_weighting))
-            .add(highway_trunk_link.multiply(self.highway_trunk_link_weighting))
-            .add(highway_turning_circle.multiply(self.highway_turning_circle_weighting))
-            .add(highway_unclassified.multiply(self.highway_unclassified_weighting))
-            .add(ee.Image(self.inputs["groads_additions"]["ee_path"]).multiply(self.highway_groads_weighting))
-        ).multiply(2)
-
-
-        roads_bool = highway_total.gt(0)
-
-        roads_indirect = roads_bool.eq(0)\
-            .cumulativeCost(roads_bool, 15000)\
-            .reproject(crs=self.crs, scale=self.scale)\
-            .multiply(self.DECAY_CONSTANT)\
-            .exp()\
-            .multiply(self.INDIRECT_INFLUENCE)\
+        road_driver = (
+            self.road_direct_cost.addBands(self.road_indirect_cost)
+            .reduce(ee.Reducer.max())
             .unmask(0)
+            .updateMask(self.water)
+            .multiply(100)
+            .int()
+            .rename("hii_road_driver")
+        )
 
-        roads_total = highway_total.add(roads_indirect).updateMask(watermask)
-
+        # TODO: implement normalization options
         self.export_image_ee(
-            roads_total,
-            "{}/{}".format(self.ee_driverdir, "aois/" + self.realm),
-            
+            road_driver,
+            f"driver/roads",
         )
 
     def check_inputs(self):
-        super().check_inputs()
+        if self.taskdate >= self.OSM_START:
+            super().check_inputs()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--realm", default='Afrotropic')
     parser.add_argument("-d", "--taskdate", default=datetime.now(timezone.utc).date())
     options = parser.parse_args()
     road_task = HIIRoad(**vars(options))
