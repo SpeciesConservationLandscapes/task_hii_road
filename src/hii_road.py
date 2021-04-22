@@ -5,7 +5,7 @@ from task_base import HIITask
 
 
 class HIIRoad(HIITask):
-    SCALE = 300
+    scale = 300
     OSM_START = datetime(2012, 9, 12).date()
     NOMINAL_ROAD_WIDTH = 300  # width of roads in inputs
     DIRECT_INFLUENCE_WIDTH = 1000  # total width of direct influence (meters)
@@ -79,7 +79,6 @@ class HIIRoad(HIITask):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.scale = self.SCALE
         # Sumatra AOI for testing
         # self.set_aoi_from_ee(
         #     "projects/SCL/v1/Panthera_tigris/geographies/Sumatra/Sumatra_woody_cover"
