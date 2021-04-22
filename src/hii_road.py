@@ -25,7 +25,7 @@ class HIIRoad(HIITask):
         # TODO: refactor source dir structure
         "groads": {
             "ee_type": HIITask.IMAGE,
-            "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global-v2",
+            "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global",
             "static": True,
         },
         "water": {
