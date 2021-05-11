@@ -3,7 +3,7 @@ HII ROAD DRIVER
 
 ## What does this task do?
 
-This task calculates the (unitless) anthropogenic "influence" of roads on the terrestrical surface as one of the key
+This task calculates the (unitless) anthropogenic "influence" of roads on the terrestrial surface as one of the key
 drivers for a combined [Human Influence Index](https://github.com/SpeciesConservationLandscapes/task_hii_weightedsum)
 . "Influence" is a combination of `direct` and `indirect` influence
 relative to each cell with at least one road. These source road cells are a combination of:
