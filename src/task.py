@@ -66,7 +66,7 @@ class HIIRoad(HIITask):
             "highway_rest_area": 7,
             "highway_turning_circle": 8,
             # groad
-            "groad": 10,
+            "groad": 8,
         },
         "non_motorized": {
             "highway_footway": 2,
