@@ -5,8 +5,7 @@ from task_base import HIITask
 
 
 class HIIRoad(HIITask):
-    scale = 300
-    OSM_START = datetime(2012, 9, 12).date()
+    OSM_START = datetime(2014, 1, 1).date()
     NOMINAL_ROAD_WIDTH = 300  # width of roads in inputs
     DIRECT_INFLUENCE_WIDTH = 1000  # total width of direct influence (meters)
     INDIRECT_INFLUENCE_RADIUS = (
@@ -22,7 +21,6 @@ class HIIRoad(HIITask):
             "ee_path": "projects/HII/v1/osm/osm_image",
             "maxage": 1,
         },
-        # TODO: refactor source dir structure
         "groads": {
             "ee_type": HIITask.IMAGE,
             "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global",
@@ -227,7 +225,6 @@ class HIIRoad(HIITask):
             .rename("hii_road_driver")
         )
 
-        # TODO: implement normalization options
         self.export_image_ee(
             road_driver,
             f"driver/roads",
