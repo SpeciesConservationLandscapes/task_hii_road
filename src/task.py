@@ -5,7 +5,7 @@ from task_base import HIITask
 
 
 class HIIRoad(HIITask):
-    OSM_START = datetime(2014, 1, 1).date()
+    OSM_START = datetime(2014, 6, 4).date()
     NOMINAL_ROAD_WIDTH = 300  # width of roads in inputs
     DIRECT_INFLUENCE_WIDTH = 1000  # total width of direct influence (meters)
     INDIRECT_INFLUENCE_RADIUS = (
