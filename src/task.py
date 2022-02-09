@@ -225,10 +225,7 @@ class HIIRoad(HIITask):
             .rename("hii_road_driver")
         )
 
-        self.export_image_ee(
-            road_driver,
-            f"driver/roads",
-        )
+        self.export_image_ee(road_driver, f"driver/roads")
 
     def check_inputs(self):
         if self.taskdate >= self.OSM_START:
