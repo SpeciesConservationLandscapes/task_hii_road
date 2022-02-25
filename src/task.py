@@ -1,6 +1,6 @@
 import argparse
 import ee
-from datetime import datetime, timezone
+from datetime import datetime
 from task_base import HIITask
 
 
@@ -24,11 +24,6 @@ class HIIRoad(HIITask):
         "groads": {
             "ee_type": HIITask.IMAGE,
             "ee_path": "projects/HII/v1/source/infra/gROADS-v1-global",
-            "static": True,
-        },
-        "water": {
-            "ee_type": HIITask.IMAGE,
-            "ee_path": "projects/HII/v1/source/phys/watermask_jrc70_cciocean",
             "static": True,
         },
     }
@@ -85,7 +80,6 @@ class HIIRoad(HIITask):
             ee.ImageCollection(self.inputs["osm"]["ee_path"])
         )
         self.groads = ee.Image(self.inputs["groads"]["ee_path"])
-        self.water = ee.Image(self.inputs["water"]["ee_path"])
         self.road_direct_cost = None
         self.road_indirect_cost = None
         self.kernel = {
@@ -219,7 +213,7 @@ class HIIRoad(HIITask):
             self.road_direct_cost.addBands(self.road_indirect_cost)
             .reduce(ee.Reducer.max())
             .unmask(0)
-            .updateMask(self.water)
+            .updateMask(self.watermask)
             .multiply(100)
             .int()
             .rename("hii_road_driver")
