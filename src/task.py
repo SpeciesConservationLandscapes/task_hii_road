@@ -90,6 +90,8 @@ class HIIRoad(HIITask):
                 radius=self.INDIRECT_INFLUENCE_RADIUS, units="meters"
             ),
         }
+        self.export_path = None
+        self.noosm = kwargs.get("noosm", False)
 
     def osm_groads_combined_influence(self):
         osm_band_names = self.osm.bandNames()
@@ -204,7 +206,7 @@ class HIIRoad(HIITask):
         )
 
     def calc(self):
-        if self.osm:
+        if self.osm and self.noosm is False:
             self.osm_groads_combined_influence()
         else:
             self.groads_influence()
@@ -219,7 +221,12 @@ class HIIRoad(HIITask):
             .rename("hii_road_driver")
         )
 
-        self.export_image_ee(road_driver, f"driver/roads")
+        if self.noosm is False:
+            self.export_path = f"driver/roads"
+        else:
+            self.export_path = f"driver/roads_no_osm"
+
+        self.export_image_ee(road_driver, self.export_path)
 
     def check_inputs(self):
         if self.taskdate >= self.OSM_START:
@@ -233,6 +240,12 @@ if __name__ == "__main__":
         "--overwrite",
         action="store_true",
         help="overwrite existing outputs instead of incrementing",
+    )
+    parser.add_argument(
+        "-n",
+        "--noosm",
+        action="store_true",
+        help="do not include osm in driver calculation",
     )
     options = parser.parse_args()
     road_task = HIIRoad(**vars(options))
